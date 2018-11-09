@@ -11,7 +11,7 @@ public abstract class ECC implements IECC {
 
     @Override
     public int getDimension() {
-        return 0;
+        return this.dimension;
     }
 
     public void setLen(int len) {

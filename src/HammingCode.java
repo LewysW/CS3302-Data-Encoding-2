@@ -8,5 +8,6 @@ public class HammingCode extends ECC {
      */
     public HammingCode(int r) {
         this.setLen((int) Math.pow(2, r) - 1);
+        this.setDim(this.getLength() - r);
     }
 }
