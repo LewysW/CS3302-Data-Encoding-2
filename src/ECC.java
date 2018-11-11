@@ -23,9 +23,7 @@ public abstract class ECC implements IECC {
     }
 
     @Override
-    public BitSet encode(BitSet plaintext, int len) {
-        return null;
-    }
+    public abstract BitSet encode(BitSet plaintext, int len);
 
     @Override
     public BitSet decodeAlways(BitSet codetext, int len) {
