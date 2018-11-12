@@ -3,6 +3,7 @@ import java.util.BitSet;
 public abstract class ECC implements IECC {
     private int length;
     private int dimension;
+    private BitSet coding;
 
     @Override
     public int getLength() {
@@ -20,6 +21,14 @@ public abstract class ECC implements IECC {
 
     public void setDim(int dim) {
         this.dimension = dim;
+    }
+
+    public BitSet getCoding() {
+        return coding;
+    }
+
+    public void setCoding(BitSet coding) {
+        this.coding = coding;
     }
 
     @Override

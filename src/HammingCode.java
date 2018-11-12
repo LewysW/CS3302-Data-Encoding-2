@@ -13,6 +13,7 @@ public class HammingCode extends ECC {
         this.setLen((int) Math.pow(2, r) - 1);
         //Dimension is k, where k is n - r (length of code minus number of parity bits)
         this.setDim(this.getLength() - r);
+        System.out.println(this.toString());
     }
 
     /**
@@ -22,7 +23,7 @@ public class HammingCode extends ECC {
      * @return the encoded version of plaintext (padded with zeros to a whole number of blocks)
      */
     public BitSet encode(BitSet plaintext, int len) {
-        int size = encodedLength(this, len);
+        int size = encodedLength(len);
 
         BitSet encoding = new BitSet(size);
         setPlainText(encoding, plaintext, size);
@@ -32,9 +33,9 @@ public class HammingCode extends ECC {
     }
 
     /**
-     * Checks
-     * @param x
-     * @return
+     * Checks if number is a power of two
+     * @param x - number to check
+     * @return - true or false
      */
     boolean powerOfTwo(int x) {
         return (x != 0) && ((x & (x - 1)) == 0);
@@ -72,7 +73,8 @@ public class HammingCode extends ECC {
      * Corrects codetext with a single error
      * @param codetext - to be corrected
      * @param len - length of codetext
-     * @return corrected codetext
+     * @return corrected codetext{
+            if
      */
     BitSet correctError(BitSet codetext, int len) {
         HashMap<Integer, Boolean> pbits = new HashMap<>();
@@ -104,13 +106,12 @@ public class HammingCode extends ECC {
 
     /**
      * Returns the length of a Code encoding a code of plainLength
-     * @param c - Hamming Code object
      * @param plainLength - length of plaintext
      * @return - length of encoding
      */
-    private int encodedLength(IECC c, int plainLength) {
-        int d = c.getDimension();
-        int l = c.getLength();
+    private int encodedLength(int plainLength) {
+        int d = this.getDimension();
+        int l = this.getLength();
         return ((plainLength + d - 1) / d) * l;
     }
 
@@ -167,6 +168,17 @@ public class HammingCode extends ECC {
         }
 
         return encoding;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Length: ");
+        sb.append(this.getLength());
+        sb.append(" Dimension: ");
+        sb.append(this.getDimension());
+        sb.append(" Parity Bits: ");
+        sb.append(this.getLength() - this.getDimension());
+        return sb.toString();
     }
 
     /**
