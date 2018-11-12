@@ -1,5 +1,4 @@
 import java.lang.Math;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 
@@ -7,7 +6,7 @@ public class HammingCode extends ECC {
 
     /**
      * Constructor for HammingCode class
-     * @param r - redundant bits
+     * @param r - parity bits
      */
     public HammingCode(int r) {
         //Length n is 2^r - 1 (where r is the number of parity bits)
@@ -26,18 +25,47 @@ public class HammingCode extends ECC {
         int size = encodedLength(this, len);
 
         BitSet encoding = new BitSet(size);
-        encoding = setPlainText(encoding, plaintext, size);
-        encoding = setParityBits(encoding, size);
-
-        printMatrix(encoding, size);
+        setPlainText(encoding, plaintext, size);
+        setParityBits(encoding, size);
 
         return encoding;
     }
 
+    /**
+     * Checks
+     * @param x
+     * @return
+     */
+    boolean powerOfTwo(int x) {
+        return (x != 0) && ((x & (x - 1)) == 0);
+    }
+
+    /**
+     * Decodes message by correcting any 1-bit error
+     * and stripping the parity bits
+     * @param codetext - message to be decoded
+     * @param len - length of message
+     * @return - decoded message
+     */
     public BitSet decodeAlways(BitSet codetext, int len) {
-        codetext = correctError(codetext, len);
-        printMatrix(codetext, len);
-        return null;
+        return stripParity(correctError(codetext, len), len);
+    }
+
+    /**
+     * Strips parity bits from encoding
+     * @param codetext - encoding to strip parity
+     * @param len - length of encoding
+     * @return decoded BitSet
+     */
+    private BitSet stripParity(BitSet codetext, int len) {
+        BitSet decoding = new BitSet(len);
+        int index = 0;
+
+        for (int i = 1; i <= len; i++) {
+            if (!powerOfTwo(i)) decoding.set(index++, codetext.get(i - 1));
+        }
+
+        return decoding;
     }
 
     /**
@@ -50,7 +78,6 @@ public class HammingCode extends ECC {
         HashMap<Integer, Boolean> pbits = new HashMap<>();
         int errOffset = 0;
         int exp = 0;
-        printMatrix(codetext, len);
 
         //Records current parity bits of codetext and sets each to 0
         for (int i = 1; i < len; i = (int) Math.pow(2, ++exp)) {

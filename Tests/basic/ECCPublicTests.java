@@ -134,7 +134,6 @@ class ECCPublicTests {
             BitSet ciph = c.encode(p, i);
             int errpos = ran.nextInt(enclen);
             ciph.set(errpos, !ciph.get(errpos));
-            System.out.println(enclen);
             assertEquals(p, c.decodeAlways(ciph, enclen), c.toString() + " does not decode one error");
         }
     }
