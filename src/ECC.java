@@ -26,12 +26,13 @@ public abstract class ECC implements IECC {
     public abstract BitSet encode(BitSet plaintext, int len);
 
     @Override
-    public BitSet decodeAlways(BitSet codetext, int len) {
-        return null;
-    }
+    public abstract BitSet decodeAlways(BitSet codetext, int len);
 
     @Override
     public BitSet decodeIfUnique(BitSet codetext, int len) {
+        if (this instanceof HammingCode) {
+            return this.decodeAlways(codetext, len);
+        }
         return null;
     }
 

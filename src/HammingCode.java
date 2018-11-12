@@ -1,5 +1,7 @@
 import java.lang.Math;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
 
 public class HammingCode extends ECC {
 
@@ -21,7 +23,6 @@ public class HammingCode extends ECC {
      * @return the encoded version of plaintext (padded with zeros to a whole number of blocks)
      */
     public BitSet encode(BitSet plaintext, int len) {
-        printMatrix(plaintext, len);
         int size = encodedLength(this, len);
 
         BitSet encoding = new BitSet(size);
@@ -31,6 +32,47 @@ public class HammingCode extends ECC {
         printMatrix(encoding, size);
 
         return encoding;
+    }
+
+    public BitSet decodeAlways(BitSet codetext, int len) {
+        codetext = correctError(codetext, len);
+        printMatrix(codetext, len);
+        return null;
+    }
+
+    /**
+     * Corrects codetext with a single error
+     * @param codetext - to be corrected
+     * @param len - length of codetext
+     * @return corrected codetext
+     */
+    BitSet correctError(BitSet codetext, int len) {
+        HashMap<Integer, Boolean> pbits = new HashMap<>();
+        int errOffset = 0;
+        int exp = 0;
+        printMatrix(codetext, len);
+
+        //Records current parity bits of codetext and sets each to 0
+        for (int i = 1; i < len; i = (int) Math.pow(2, ++exp)) {
+            pbits.put(i, codetext.get(i - 1));
+            codetext.set(i - 1, false);
+
+        }
+
+        //Recomputes the parity bits of the codetext
+        BitSet corrected = setParityBits(codetext, len);
+
+        //Works out the offset of the error bit using differences between original and recomputed parity bits
+        exp = 0;
+        for (int i = 1; i < len; i = (int) Math.pow(2, ++exp)) {
+            if (!pbits.get(i).equals(corrected.get(i - 1))) errOffset += i;
+            codetext.set(i - 1, pbits.get(i));
+        }
+
+        //Corrects the error bit
+        corrected = codetext;
+        if (errOffset > 0) corrected.flip(errOffset - 1);
+        return corrected;
     }
 
     /**
