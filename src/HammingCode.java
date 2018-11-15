@@ -13,7 +13,6 @@ public class HammingCode extends ECC {
         this.setLen((int) Math.pow(2, r) - 1);
         //Dimension is k, where k is n - r (length of code minus number of parity bits)
         this.setDim(this.getLength() - r);
-        System.out.println(this.toString());
     }
 
     /**

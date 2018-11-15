@@ -1,4 +1,3 @@
-import java.sql.SQLOutput;
 import java.util.BitSet;
 import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;

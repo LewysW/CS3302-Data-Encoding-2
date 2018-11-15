@@ -10,6 +10,6 @@ public class ECCFactory implements IECCFactory {
 
     @Override
     public IECC makeReedMullerCode(int k, int r) {
-        return null;
+        return new ReedMullerCode(k, r);
     }
 }
