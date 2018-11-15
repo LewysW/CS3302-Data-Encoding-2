@@ -10,7 +10,7 @@ public class ReedMullerCode extends ECC {
         this.setLen((int) Math.pow(2, k));
         this.setDim(dimension(r, k));
         ArrayList<BitSet> genMatrix = new ArrayList<>();
-        printMatrix(getMatrix(3, genMatrix));
+        printMatrix(getMatrix(k));
     }
 
     private ArrayList<BitSet> generateMatrix(int r, int k, ArrayList<BitSet> matrix) {
@@ -29,6 +29,7 @@ public class ReedMullerCode extends ECC {
 
     /**
      * Generates a matrix with a fixed value of r and variable value of k
+     * @k - k value of matrix
      * @return
      */
     private ArrayList<BitSet> getMatrix(int k) {
@@ -38,32 +39,37 @@ public class ReedMullerCode extends ECC {
         for (int i = 0; i <= k; i++) {
             if (i == 0) {
                 //Set row with all ones
-
                 BitSet bitSet = new BitSet(1);
-                bitSet.set(0, );
+                bitSet.set(0);
                 matrix.add(bitSet);
             } else {
                 //Set row with 2^n-1 ones and 2^n-1 zeros
-                BitSet bitSet = new BitSet((int) Math.pow(2, k));
-                int numOnes = (int) Math.pow(2, k - 1);
-                bitSet.set(0, numOnes - 1, true);
-                bitSet.set(numOnes, (2 * numOnes - 1), false);
+                BitSet bitSet = new BitSet((int) Math.pow(2, i));
+                int numBits = (int) Math.pow(2, i - 1);
+                bitSet.set(0, numBits, false);
+                bitSet.set(numBits, (2 * numBits), true);
                 newMatrix.add(bitSet);
 
-                //Set new matrix with two rows that are two fold the rows of the previous matrix
-                for (int i = 0; i < matrix.size(); i++) {
-                    bitSet = new BitSet((int) Math.pow(2, k));
-                    int prevLen = (int) Math.pow(2, k - 1);
+                //Set new matrix with two rows that are two fold (two repetitions) the rows of the previous matrix
+                for (int row = 0; row < matrix.size(); row++) {
+                    bitSet = new BitSet((int) Math.pow(2, i));
+                    int prevLen = (int) Math.pow(2, i - 1);
 
-                    for (int j = 0; j < prevLen; j++) {
-                        bitSet.set(j, matrix.get(i).get(j));
-                        bitSet.set(j + prevLen, matrix.get(i).get(j));
+                    for (int bit = 0; bit < prevLen; bit++) {
+                        bitSet.set(bit, matrix.get(row).get(bit));
+                        bitSet.set(bit + prevLen, matrix.get(row).get(bit));
                     }
 
                     newMatrix.add(bitSet);
                 }
+
+                matrix = (ArrayList<BitSet>) newMatrix.clone();
+                newMatrix.clear();
+                printMatrix(matrix);
             }
         }
+
+        return newMatrix;
     }
 
 
