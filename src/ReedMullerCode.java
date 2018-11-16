@@ -6,12 +6,12 @@ import java.util.Collections;
 public class ReedMullerCode extends ECC {
 
     public ReedMullerCode(int k, int r) {
-        r = 2;
         k = 3;
+        r = 1;
         this.setLen((int) Math.pow(2, k));
         this.setDim(dimension(r, k));
-        ArrayList<BitSet> genMatrix = new ArrayList<>();
-        printMatrix(generateMatrix(k, r));
+        setGenMatrix(generateMatrix(k, r));
+        printMatrix(getGenMatrix());
     }
 
     /**
@@ -83,7 +83,7 @@ public class ReedMullerCode extends ECC {
     }
 
     /**
-     * Expands a given matrix of r = 1 to the degree of the matrix with a given r.
+     * Expands a given matrix of r = 1 to include the r-degree polynomials of a given value of r
      * e.g. if k = 3, r = 2, calculates x1x2, x1x3, x2x3 and adds each vector to matrix
      * @param matrix - matrix to expand
      * @param r - degree to expand to
@@ -233,11 +233,6 @@ public class ReedMullerCode extends ECC {
             System.out.println();
         }
         System.out.println();
-    }
-
-    @Override
-    public BitSet encode(BitSet plaintext, int len) {
-        return null;
     }
 
     @Override
