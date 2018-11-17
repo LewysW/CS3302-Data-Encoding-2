@@ -6,8 +6,6 @@ import java.util.Collections;
 public class ReedMullerCode extends ECC {
 
     public ReedMullerCode(int k, int r) {
-        k = 3;
-        r = 1;
         this.setLen((int) Math.pow(2, k));
         this.setDim(dimension(r, k));
         setGenMatrix(generateMatrix(k, r));
@@ -56,6 +54,7 @@ public class ReedMullerCode extends ECC {
         }
         invert(matrix);
         expand(matrix, r);
+        standardise(matrix);
         return matrix;
     }
 
@@ -218,21 +217,6 @@ public class ReedMullerCode extends ECC {
         }
 
         return value;
-    }
-
-    /**
-     * Prints a matrix
-     * @param matrix - to print
-     */
-    private void printMatrix(ArrayList<BitSet> matrix) {
-        for (BitSet b : matrix) {
-            for (int i = 0; i < this.getLength(); i++) {
-                if (b.get(i)) System.out.print("1 ");
-                else System.out.print("0 ");
-            }
-            System.out.println();
-        }
-        System.out.println();
     }
 
     @Override
