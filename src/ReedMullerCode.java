@@ -9,7 +9,13 @@ public class ReedMullerCode extends ECC {
         this.setLen((int) Math.pow(2, k));
         this.setDim(dimension(r, k));
         setGenMatrix(generateMatrix(k, r));
-        printMatrix(getGenMatrix());
+        standardise(getGenMatrix());
+        setParCheckMatrix(transpose(getGenMatrix(), this.getLength()));
+
+        System.out.println("Generator Matrix:");
+        printMatrix(getGenMatrix(), this.getLength());
+        System.out.println("Parity Check Matrix:");
+        printMatrix(getParCheckMatrix(), getGenMatrix().size());
     }
 
     /**

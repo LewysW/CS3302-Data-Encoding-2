@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -6,6 +7,7 @@ public abstract class ECC implements IECC {
     private int length;
     private int dimension;
     private ArrayList<BitSet> genMatrix;
+    private ArrayList<BitSet> parCheckMatrix;
     private static final int NONE = -1;
 
     @Override
@@ -34,7 +36,39 @@ public abstract class ECC implements IECC {
         this.genMatrix = genMatrix;
     }
 
-    public void standardise(ArrayList<BitSet> genMatrix) {
+    public ArrayList<BitSet> getParCheckMatrix() {
+        return parCheckMatrix;
+    }
+
+    protected void setParCheckMatrix(ArrayList<BitSet> parCheckMatrix) {
+        this.parCheckMatrix = parCheckMatrix;
+    }
+
+    protected ArrayList<BitSet> transpose(ArrayList<BitSet> matrix, int len) {
+        ArrayList<BitSet> transposed = new ArrayList<>();
+        int index = 0;
+
+        for (int col = len - 1; col >= 0; col--) {
+            transposed.add(new BitSet(genMatrix.size()));
+            for (int row = 0; row < matrix.size(); row++) {
+                transposed.get(index).set(row, matrix.get(row).get(col));
+            }
+            index++;
+        }
+
+        return transposed;
+    }
+
+    /**
+     * Puts a given matrix into standard form.
+     *
+     * Does this by processing matrix line-by-line,
+     * moving row with left most 1 bit for current column to top of unprocessed matrix.
+     * Then eliminates all 1 bits above and below by adding current row to the other rows.
+     * If there is no set bit in the current column at the correct row, columns are swapped until there is.
+     * @param genMatrix - matrix to standardise
+     */
+    protected void standardise(ArrayList<BitSet> genMatrix) {
         //Iterates over each row, rearranging the matrix to get the leftmost one in the correct position
         for (int row = 0, col = 0; row < genMatrix.size(); row++, col++) {
             int setRow = NONE;
@@ -47,7 +81,7 @@ public abstract class ECC implements IECC {
 
                 if (setRow == NONE) {
                     swapColumns(genMatrix, col, nextCol++);
-                } else {
+                } else if (setRow != row) {
                     Collections.swap(genMatrix, setRow, row);
                 }
             }
@@ -106,9 +140,9 @@ public abstract class ECC implements IECC {
      * Prints a matrix
      * @param matrix - to print
      */
-    protected void printMatrix(ArrayList<BitSet> matrix) {
+    protected void printMatrix(ArrayList<BitSet> matrix, int len) {
         for (BitSet b : matrix) {
-            for (int i = 0; i < this.getLength(); i++) {
+            for (int i = 0; i < len; i++) {
                 if (b.get(i)) System.out.print("1 ");
                 else System.out.print("0 ");
             }
@@ -119,9 +153,7 @@ public abstract class ECC implements IECC {
 
     @Override
     public BitSet encode(BitSet plaintext, int len) {
-        BitSet bsMatrix = new BitSet(len);
-        System.out.println("length: " + this.getLength() + " dimension: " + this.getDimension());
-        standardise(getGenMatrix());
+
         return null;
     }
 
