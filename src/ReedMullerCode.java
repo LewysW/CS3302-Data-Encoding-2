@@ -6,16 +6,18 @@ import java.util.Collections;
 public class ReedMullerCode extends ECC {
 
     public ReedMullerCode(int k, int r) {
+        k = 5;
+        r = 1;
         this.setLen((int) Math.pow(2, k));
         this.setDim(dimension(r, k));
         setGenMatrix(generateMatrix(k, r));
         standardise(getGenMatrix());
-        setParCheckMatrix(transpose(getGenMatrix(), this.getLength()));
+        setParCheckMatrix(genParityMatrix(getGenMatrix()));
 
         System.out.println("Generator Matrix:");
         printMatrix(getGenMatrix(), this.getLength());
         System.out.println("Parity Check Matrix:");
-        printMatrix(getParCheckMatrix(), getGenMatrix().size());
+        printMatrix(getParCheckMatrix(), this.getLength() - getGenMatrix().size());
     }
 
     /**

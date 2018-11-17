@@ -44,19 +44,29 @@ public abstract class ECC implements IECC {
         this.parCheckMatrix = parCheckMatrix;
     }
 
-    protected ArrayList<BitSet> transpose(ArrayList<BitSet> matrix, int len) {
-        ArrayList<BitSet> transposed = new ArrayList<>();
-        int index = 0;
+    protected ArrayList<BitSet> genParityMatrix(ArrayList<BitSet> matrix) {
+        ArrayList<BitSet> parityMatrix = new ArrayList<>();
+        int length = this.getLength() - matrix.size();
 
-        for (int col = len - 1; col >= 0; col--) {
-            transposed.add(new BitSet(genMatrix.size()));
-            for (int row = 0; row < matrix.size(); row++) {
-                transposed.get(index).set(row, matrix.get(row).get(col));
+        //Adds parity bits of generator matrix to parity check matrix
+        for (int row = 0; row < matrix.size(); row++) {
+            parityMatrix.add(new BitSet(length));
+            for (int col = matrix.size(), pbit = 0; col < this.getLength(); col++, pbit++) {
+                parityMatrix.get(row).set(pbit, matrix.get(row).get(col));
             }
-            index++;
         }
 
-        return transposed;
+        for (int row = parityMatrix.size(), col = 0; row < this.getLength(); row++, col++) {
+            parityMatrix.add(new BitSet(length));
+
+            if (length == 1) {
+                parityMatrix.get(row).set(0);
+            } else {
+                parityMatrix.get(row).set(col);
+            }
+        }
+
+        return parityMatrix;
     }
 
     /**
