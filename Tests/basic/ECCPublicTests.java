@@ -45,6 +45,7 @@ class ECCPublicTests {
         for (int i = MIN_RM_K; i <= MAX_RM_K; i++) {
             rmCodes[i] = new IECC[i];
             for (int j = (i < RM_K_CUTOFF) ? 0 : (i == RM_K_CUTOFF) ? RM_K_TRANSITIONAL : i - RM_K_BOUND2; j < i; j++) {
+                System.out.println("i: " + i + " j: " + j);
                 rmCodes[i][j] = f.makeReedMullerCode(i, j);
             }
         }

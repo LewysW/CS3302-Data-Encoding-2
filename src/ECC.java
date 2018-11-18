@@ -1,13 +1,13 @@
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
+import java.util.*;
 
 public abstract class ECC implements IECC {
     private int length;
     private int dimension;
+    private int distance;
     private ArrayList<BitSet> genMatrix;
     private ArrayList<BitSet> parCheckMatrix;
+    private HashMap<BitSet, Error> synTable;
     private static final int NONE = -1;
 
     @Override
@@ -44,19 +44,104 @@ public abstract class ECC implements IECC {
         this.parCheckMatrix = parCheckMatrix;
     }
 
-    protected ArrayList<BitSet> genParityMatrix(ArrayList<BitSet> matrix) {
-        ArrayList<BitSet> parityMatrix = new ArrayList<>();
-        int length = this.getLength() - matrix.size();
+    public int getDistance() {
+        return distance;
+    }
 
-        //Adds parity bits of generator matrix to parity check matrix
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public HashMap<BitSet, Error> getSynTable() {
+        return synTable;
+    }
+
+    public void setSynTable(HashMap<BitSet, Error> synTable) {
+        this.synTable = synTable;
+    }
+
+    protected HashMap<BitSet, BitSet> genSynTable() {
+        ArrayList<BitSet> parityMatrix = getParCheckMatrix();
+        int maxErrSize = (getDistance() - 1) / 2;
+        int ubound = 0;
+        BitSet error = new BitSet(getLength());
+        //TODO add zero code
+
+        for (int i = 0; i < maxErrSize; i++) ubound += binomial(getLength(), i);
+        System.out.println(ubound);
+
+        return null;
+    }
+
+    private ArrayList<ArrayList<Integer>> getErrorCodes(int upperbound, int errorNum) {
+        ArrayList<Integer> combos = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> products = new ArrayList<>();
+        for (int i = 1; i < upperbound; i++) combos.add(i);
+
+        int n = combos.size();
+        int N = errorNum;
+
+        //Iterate from 1 to upper bound of list of possible permutations
+        for (int i = 1; i < N; i++) {
+            //Generate binary representation of current permutation in range 1 - 2^n
+            String code = Integer.toBinaryString(N | i).substring(1);
+            products.add(new ArrayList<>());
+
+            //Iterate through bits in code
+            for (int j = 0; j < n; j++) {
+                //Checks if column in code corresponding to index 'j' is set
+                if (code.charAt(j) == '1') {
+                    products.get(i - 1).add(combos.get(j));
+                }
+            }
+        }
+        return products;
+    }
+
+    /**
+     * Calculates the binomial coefficient of two numbers n and k
+     * @param n - n elements
+     * @param k - k elements
+     * @return - binomial coefficient
+     */
+    protected int binomial(int n, int k) {
+        return (factorial(n)) / (factorial(k) * factorial(n - k));
+    }
+
+    /**
+     * Calculates factorial of a given number n
+     * @param n - number to calculate factorial of
+     * @return - n!
+     */
+    protected int factorial(int n) {
+        int value = 1;
+
+        for (int i = 2; i <= n; i++) {
+            value *= i;
+        }
+
+        return value;
+    }
+
+    /**
+     * Generates a parity check matrix using the generator matrix
+     * @return - parity check matrix
+     */
+    protected ArrayList<BitSet> genParityMatrix() {
+        ArrayList<BitSet> parityMatrix = new ArrayList<>();
+        ArrayList<BitSet> matrix = getGenMatrix();
+        int length = getLength() - matrix.size();
+
+        //Adds parity bits of generator matrix to top of parity check matrix
         for (int row = 0; row < matrix.size(); row++) {
             parityMatrix.add(new BitSet(length));
-            for (int col = matrix.size(), pbit = 0; col < this.getLength(); col++, pbit++) {
+            for (int col = matrix.size(), pbit = 0; col < getLength(); col++, pbit++) {
                 parityMatrix.get(row).set(pbit, matrix.get(row).get(col));
             }
         }
 
-        for (int row = parityMatrix.size(), col = 0; row < this.getLength(); row++, col++) {
+        //Adds identity matrix to bottom of parity check matrix
+        for (int row = parityMatrix.size(), col = 0; row < getLength(); row++, col++) {
             parityMatrix.add(new BitSet(length));
 
             if (length == 1) {
@@ -137,7 +222,7 @@ public abstract class ECC implements IECC {
      * @param col2 - second column to swap
      */
     public void swapColumns(ArrayList<BitSet> matrix, int col1, int col2) {
-        if (col1 >= this.getLength() || col2 >= this.getLength()) return;
+        if (col1 >= getLength() || col2 >= getLength()) return;
 
         for (int i = 0; i < matrix.size(); i++) {
             boolean temp = matrix.get(i).get(col1);

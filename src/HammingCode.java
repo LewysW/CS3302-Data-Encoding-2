@@ -9,10 +9,11 @@ public class HammingCode extends ECC {
      * @param r - parity bits
      */
     public HammingCode(int r) {
+        setDistance(3);
         //Length n is 2^r - 1 (where r is the number of parity bits)
-        this.setLen((int) Math.pow(2, r) - 1);
+        setLen((int) Math.pow(2, r) - 1);
         //Dimension is k, where k is n - r (length of code minus number of parity bits)
-        this.setDim(this.getLength() - r);
+        setDim(getLength() - r);
     }
 
     /**
@@ -109,8 +110,8 @@ public class HammingCode extends ECC {
      * @return - length of encoding
      */
     private int encodedLength(int plainLength) {
-        int d = this.getDimension();
-        int l = this.getLength();
+        int d = getDimension();
+        int l = getLength();
         return ((plainLength + d - 1) / d) * l;
     }
 
@@ -172,11 +173,11 @@ public class HammingCode extends ECC {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Length: ");
-        sb.append(this.getLength());
+        sb.append(getLength());
         sb.append(" Dimension: ");
-        sb.append(this.getDimension());
+        sb.append(getDimension());
         sb.append(" Parity Bits: ");
-        sb.append(this.getLength() - this.getDimension());
+        sb.append(getLength() - getDimension());
         return sb.toString();
     }
 
@@ -187,7 +188,7 @@ public class HammingCode extends ECC {
      */
     private void printMatrix(BitSet matrix, int size) {
         for (int i = 0; i < size; i++) {
-            if (i == this.getLength()) System.out.println();
+            if (i == getLength()) System.out.println();
 
             if (matrix.get(i)) System.out.print(1);
             else System.out.print(0);
