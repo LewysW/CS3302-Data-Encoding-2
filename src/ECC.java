@@ -63,33 +63,62 @@ public abstract class ECC implements IECC {
     protected HashMap<BitSet, BitSet> genSynTable() {
         ArrayList<BitSet> parityMatrix = getParCheckMatrix();
         int maxErrSize = (getDistance() - 1) / 2;
-        int ubound = 0;
-        BitSet error = new BitSet(getLength());
         //TODO add zero code
 
-        addErrorCodes(null, 3);
+        ArrayList<String> errors = new ArrayList<>();
+
+
 
         return null;
     }
 
-    private HashMap<BitSet, Error> addErrorCodes(HashMap<BitSet, Error> errCodes, int errorNum) {
-        ArrayList<BitSet> permutations = new ArrayList<>();
-
-        for (int i = 0; i < getLength() - errorNum + 1; i++) {
-            permutations.add(new BitSet(getLength()));
-            permutations.get(i).set(i, i + errorNum);
+    /**
+     * BEGIN CITATION - NOT BY ME NO TGAP INTENDED
+     * https://www.geeksforgeeks.org/print-all-possible-combinations-of-r-elements-in-a-given-array-of-size-n/
+     * @param arr
+     * @param data
+     * @param start
+     * @param end
+     * @param index
+     * @param r
+     */
+    static void combinationUtil(int arr[], int data[], int start,
+                                int end, int index, int r)
+    {
+        // Current combination is ready to be printed, print it
+        if (index == r)
+        {
+            for (int j=0; j<r; j++)
+                System.out.print(data[j]+" ");
+            System.out.println("");
+            return;
         }
 
-        for (int i = 0; i < permutations.size(); i++) {
-            for (int j = 0; j < getLength(); j++) {
-                if (permutations.get(i).get(j)) System.out.print(1);
-                else System.out.print(0);
-            }
-            System.out.println();
+        // replace index with all possible elements. The condition
+        // "end-i+1 >= r-index" makes sure that including one element
+        // at index will make a combination with remaining elements
+        // at remaining positions
+        for (int i=start; i<=end && end-i+1 >= r-index; i++)
+        {
+            data[index] = arr[i];
+            combinationUtil(arr, data, i+1, end, index+1, r);
         }
-
-        return null;
     }
+
+    // The main function that prints all combinations of size r
+    // in arr[] of size n. This function mainly uses combinationUtil()
+    static void printCombination(int arr[], int n, int r)
+    {
+        // A temporary array to store all combination one by one
+        int data[]=new int[r];
+
+        // Print all combination using temprary array 'data[]'
+        combinationUtil(arr, data, 0, n-1, 0, r);
+    }
+    /**
+     * END CITATION
+     */
+
 
     /**
      * Calculates the binomial coefficient of two numbers n and k
@@ -97,7 +126,7 @@ public abstract class ECC implements IECC {
      * @param k - k elements
      * @return - binomial coefficient
      */
-    protected int binomial(int n, int k) {
+    protected double binomial(long n, long k) {
         return (factorial(n)) / (factorial(k) * factorial(n - k));
     }
 
@@ -106,10 +135,10 @@ public abstract class ECC implements IECC {
      * @param n - number to calculate factorial of
      * @return - n!
      */
-    protected int factorial(int n) {
-        int value = 1;
+    protected double factorial(long n) {
+        double value = 1;
 
-        for (int i = 2; i <= n; i++) {
+        for (long i = 2; i <= n; i++) {
             value *= i;
         }
 
