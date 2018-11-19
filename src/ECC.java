@@ -63,17 +63,29 @@ public abstract class ECC implements IECC {
     protected HashMap<BitSet, BitSet> genSynTable() {
         ArrayList<BitSet> parityMatrix = getParCheckMatrix();
         int maxErrSize = (getDistance() - 1) / 2;
-        //TODO add zero code
 
-        ArrayList<String> errors = new ArrayList<>();
+        ArrayList<BitSet> errors = new ArrayList<>();
+        int arr[] = new int[getLength()];
+        for (int i = 0; i < getLength(); i++) arr[i] = i;
+        int n = arr.length;
 
+        for (int i = 0; i <= maxErrSize; i++) {
+            getErrorCodes(arr, n , i, errors);
+        }
 
+        for (BitSet bs : errors) {
+            for (int i = 0; i < getLength(); i++) {
+                if (bs.get(i)) System.out.print(1);
+                else System.out.print(0);
+            }
+            System.out.println();
+        }
 
         return null;
     }
 
     /**
-     * BEGIN CITATION - NOT BY ME NO TGAP INTENDED
+     * BEGIN CITATION
      * https://www.geeksforgeeks.org/print-all-possible-combinations-of-r-elements-in-a-given-array-of-size-n/
      * @param arr
      * @param data
@@ -82,38 +94,26 @@ public abstract class ECC implements IECC {
      * @param index
      * @param r
      */
-    static void combinationUtil(int arr[], int data[], int start,
-                                int end, int index, int r)
+    private void combinationUtil(int arr[], int data[], int start,
+                                int end, int index, int r, ArrayList<BitSet> errorCodes)
     {
-        // Current combination is ready to be printed, print it
-        if (index == r)
-        {
+        if (index == r) {
+            errorCodes.add(new BitSet(getLength()));
             for (int j=0; j<r; j++)
-                System.out.print(data[j]+" ");
-            System.out.println("");
+                errorCodes.get(errorCodes.size() - 1).set(data[j]);
             return;
         }
 
-        // replace index with all possible elements. The condition
-        // "end-i+1 >= r-index" makes sure that including one element
-        // at index will make a combination with remaining elements
-        // at remaining positions
-        for (int i=start; i<=end && end-i+1 >= r-index; i++)
-        {
+        for (int i=start; i<=end && end-i+1 >= r-index; i++) {
             data[index] = arr[i];
-            combinationUtil(arr, data, i+1, end, index+1, r);
+            combinationUtil(arr, data, i+1, end, index+1, r, errorCodes);
         }
     }
 
-    // The main function that prints all combinations of size r
-    // in arr[] of size n. This function mainly uses combinationUtil()
-    static void printCombination(int arr[], int n, int r)
-    {
-        // A temporary array to store all combination one by one
+    private void getErrorCodes(int arr[], int n, int r, ArrayList<BitSet> errCodes) {
         int data[]=new int[r];
 
-        // Print all combination using temprary array 'data[]'
-        combinationUtil(arr, data, 0, n-1, 0, r);
+        combinationUtil(arr, data, 0, n-1, 0, r, errCodes);
     }
     /**
      * END CITATION
