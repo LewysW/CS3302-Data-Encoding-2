@@ -158,7 +158,6 @@ public class ReedMullerCode extends ECC {
             String code = Long.toBinaryString(N | i).substring(1);
             products.add(new ArrayList<>());
 
-            System.out.println(code);
             //Iterate through bits in code
             for (int j = 0; j < n; j++) {
                 //Checks if column in code corresponding to index 'j' is set

@@ -67,35 +67,28 @@ public abstract class ECC implements IECC {
         BitSet error = new BitSet(getLength());
         //TODO add zero code
 
-        for (int i = 0; i < maxErrSize; i++) ubound += binomial(getLength(), i);
-        System.out.println(ubound);
+        addErrorCodes(null, 3);
 
         return null;
     }
 
-    private ArrayList<ArrayList<Integer>> getErrorCodes(int upperbound, int errorNum) {
-        ArrayList<Integer> combos = new ArrayList<>();
-        ArrayList<ArrayList<Integer>> products = new ArrayList<>();
-        for (int i = 1; i < upperbound; i++) combos.add(i);
+    private HashMap<BitSet, Error> addErrorCodes(HashMap<BitSet, Error> errCodes, int errorNum) {
+        ArrayList<BitSet> permutations = new ArrayList<>();
 
-        int n = combos.size();
-        int N = errorNum;
-
-        //Iterate from 1 to upper bound of list of possible permutations
-        for (int i = 1; i < N; i++) {
-            //Generate binary representation of current permutation in range 1 - 2^n
-            String code = Integer.toBinaryString(N | i).substring(1);
-            products.add(new ArrayList<>());
-
-            //Iterate through bits in code
-            for (int j = 0; j < n; j++) {
-                //Checks if column in code corresponding to index 'j' is set
-                if (code.charAt(j) == '1') {
-                    products.get(i - 1).add(combos.get(j));
-                }
-            }
+        for (int i = 0; i < getLength() - errorNum + 1; i++) {
+            permutations.add(new BitSet(getLength()));
+            permutations.get(i).set(i, i + errorNum);
         }
-        return products;
+
+        for (int i = 0; i < permutations.size(); i++) {
+            for (int j = 0; j < getLength(); j++) {
+                if (permutations.get(i).get(j)) System.out.print(1);
+                else System.out.print(0);
+            }
+            System.out.println();
+        }
+
+        return null;
     }
 
     /**
