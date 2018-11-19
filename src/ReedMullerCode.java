@@ -17,7 +17,7 @@ public class ReedMullerCode extends ECC {
         printMatrix(getGenMatrix(), getLength());
         System.out.println("Parity Check Matrix:");
         printMatrix(getParCheckMatrix(), getLength() - getGenMatrix().size());
-        System.out.println("Syndrom Table:");
+        System.out.println("Syndrome Table:");
         genSynTable();
     }
 

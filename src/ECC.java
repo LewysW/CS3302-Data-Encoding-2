@@ -7,7 +7,7 @@ public abstract class ECC implements IECC {
     private int distance;
     private ArrayList<BitSet> genMatrix;
     private ArrayList<BitSet> parCheckMatrix;
-    private HashMap<BitSet, Error> synTable;
+    private HashMap<BitSet, BitSet> synTable = new HashMap<>();
     private static final int NONE = -1;
 
     @Override
@@ -52,11 +52,11 @@ public abstract class ECC implements IECC {
         this.distance = distance;
     }
 
-    public HashMap<BitSet, Error> getSynTable() {
+    public HashMap<BitSet, BitSet> getSynTable() {
         return synTable;
     }
 
-    public void setSynTable(HashMap<BitSet, Error> synTable) {
+    public void setSynTable(HashMap<BitSet, BitSet> synTable) {
         this.synTable = synTable;
     }
 
@@ -73,15 +73,50 @@ public abstract class ECC implements IECC {
             getErrorCodes(arr, n , i, errors);
         }
 
-        for (BitSet bs : errors) {
+        for (BitSet error : errors) {
+            synTable.put(getSyndrome(error, parityMatrix), error);
+        }
+
+        for (BitSet syndrome: synTable.keySet()) {
+            System.out.print("Syndrome: ");
+            for (int i = 0; i < (getLength() - getDimension()); i++) {
+                if (syndrome.get(i)) {
+                    System.out.print(1);
+                } else {
+                    System.out.print(0);
+                }
+            }
+
+            System.out.print(", Error: ");
+
+            BitSet error = synTable.get(syndrome);
             for (int i = 0; i < getLength(); i++) {
-                if (bs.get(i)) System.out.print(1);
-                else System.out.print(0);
+                if (error.get(i)) {
+                    System.out.print(1);
+                } else {
+                    System.out.print(0);
+                }
             }
             System.out.println();
         }
 
         return null;
+    }
+
+    protected BitSet getSyndrome(BitSet bitSet, ArrayList<BitSet> matrix) {
+        BitSet result = new BitSet(getLength() - getDimension());
+        int total = 0;
+
+        for (int col = 0; col < (getLength() - getDimension()); col++) {
+            for (int element = 0; element < matrix.size(); element++) {
+                total += (matrix.get(element).get(col) && bitSet.get(element)) ? 1 : 0;
+            }
+
+            result.set(col, total % 2 != 0);
+            total = 0;
+        }
+
+        return result;
     }
 
     /**
