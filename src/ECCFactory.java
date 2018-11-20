@@ -5,11 +5,21 @@ public class ECCFactory implements IECCFactory {
 
     @Override
     public IECC makeHammingCode(int r) {
-        return new HammingCode(r);
+        try {
+            return new HammingCode(r);
+        } catch (InvalidParameterException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public IECC makeReedMullerCode(int k, int r) {
-        return new ReedMullerCode(k, r);
+        try {
+            return new ReedMullerCode(k, r);
+        } catch (InvalidParameterException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

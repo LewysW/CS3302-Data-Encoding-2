@@ -5,25 +5,29 @@ import java.util.Collections;
 
 public class ReedMullerCode extends ECC {
 
-    public ReedMullerCode(int k, int r) {
-        setDistance((int) Math.pow(2, k - r));
-        setLen((int) Math.pow(2, k));
-        setDim(dimension(r, k));
-        setGenMatrix(generateMatrix(k, r));
-        standardise(getGenMatrix());
-        setParCheckMatrix(genParityMatrix());
+    public ReedMullerCode(int k, int r) throws InvalidParameterException {
+        if (r > k || (k < 0) || (r < 0)) {
+            throw new InvalidParameterException();
+        } else {
+            setDistance((int) Math.pow(2, k - r));
+            setLen((int) Math.pow(2, k));
+            setDim(dimension(r, k));
 
-        System.out.println("k: " + k);
-        System.out.println("r: " + r);
+            setGenMatrix(generateMatrix(k, r));
+            standardise(getGenMatrix());
+            setParCheckMatrix(genParityMatrix());
 
-        System.out.println("Generator Matrix:");
-        printMatrix(getGenMatrix(), getLength());
-        System.out.println("Parity Check Matrix:");
-        printMatrix(getParCheckMatrix(), getLength() - getGenMatrix().size());
-        System.out.println("Syndrome Table:");
-        genSynTable();
-        System.out.println();
-        System.out.println("------------------------------------");
+            System.out.println("k: " + k);
+            System.out.println("r: " + r);
+
+            System.out.println("Generator Matrix:");
+            printMatrix(getGenMatrix(), getLength());
+            System.out.println("Parity Check Matrix:");
+            printMatrix(getParCheckMatrix(), getLength() - getGenMatrix().size());
+            System.out.println("Syndrome Table:");
+            setSynTable(genSynTable());
+            System.out.println("------------------------------------");
+        }
     }
 
     /**
@@ -214,7 +218,7 @@ public class ReedMullerCode extends ECC {
 
     @Override
     public BitSet decodeAlways(BitSet codetext, int len) {
-        return null;
+        return super.decodeAlways(codetext, len);
     }
 
     @Override

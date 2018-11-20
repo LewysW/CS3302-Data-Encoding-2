@@ -1,3 +1,5 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -63,6 +65,7 @@ public abstract class ECC implements IECC {
     protected HashMap<BitSet, BitSet> genSynTable() {
         ArrayList<BitSet> parityMatrix = getParCheckMatrix();
         int maxErrSize = (getDistance() - 1) / 2;
+        HashMap<BitSet, BitSet> synTable = new HashMap<>();
 
         ArrayList<BitSet> errors = new ArrayList<>();
         int arr[] = new int[getLength()];
@@ -74,11 +77,8 @@ public abstract class ECC implements IECC {
         }
 
         for (BitSet error : errors) {
-            synTable.put(getSyndrome(error, parityMatrix), error);
+            synTable.put(matrixMult(error, parityMatrix), error);
         }
-
-
-        System.out.println("Num Correctable Errors: " + maxErrSize);
 
         for (BitSet syndrome: synTable.keySet()) {
             System.out.print("Syndrome: ");
@@ -104,14 +104,20 @@ public abstract class ECC implements IECC {
         }
 
 
-        return null;
+        return synTable;
     }
 
-    protected BitSet getSyndrome(BitSet bitSet, ArrayList<BitSet> matrix) {
-        BitSet result = new BitSet(getLength() - getDimension());
+    /**
+     * Multiplies a BitSet by a matrix to get a syndrome
+     * @param bitSet - encoded message/error code
+     * @param matrix - parity check matrix
+     * @return - syndrome entry
+     */
+    protected BitSet matrixMult(BitSet bitSet, ArrayList<BitSet> matrix) {
+        BitSet result = new BitSet(matrix.size());
         int total = 0;
 
-        for (int col = 0; col < (getLength() - getDimension()); col++) {
+        for (int col = 0; col < getLength(); col++) {
             for (int element = 0; element < matrix.size(); element++) {
                 total += (matrix.get(element).get(col) && bitSet.get(element)) ? 1 : 0;
             }
@@ -119,7 +125,6 @@ public abstract class ECC implements IECC {
             result.set(col, total % 2 != 0);
             total = 0;
         }
-
 
         return result;
     }
@@ -312,12 +317,38 @@ public abstract class ECC implements IECC {
 
     @Override
     public BitSet encode(BitSet plaintext, int len) {
+        int maxErrors = (getDistance() - 1) / 2;
+        BitSet encoded = new BitSet(len);
+        BitSet block = new BitSet(getLength());
+        ArrayList<BitSet> blocks = new ArrayList<>();
 
-        return null;
+        if (len <= 0 || maxErrors < 1) return plaintext;
+        for (int i = 0; i < len; i += getLength()) {
+            block = matrixMult(plaintext.get(i, i + getLength() - 1), getGenMatrix());
+
+            blocks.add((BitSet) block.clone());
+        }
+
+        System.out.println("Block: " + block);
+        System.out.println("Blocks: " + blocks);
+
+        int offset = 0;
+        for (BitSet b: blocks) {
+            for (int bit = 0; bit < getLength(); bit++) {
+                encoded.set(offset + bit, b.get(bit));
+            }
+            offset += getLength();
+        }
+
+        System.out.println("Encoded: " + encoded);
+
+        return encoded;
     }
 
     @Override
-    public abstract BitSet decodeAlways(BitSet codetext, int len);
+    public BitSet decodeAlways(BitSet codetext, int len) {
+        return null;
+    }
 
     @Override
     public BitSet decodeIfUnique(BitSet codetext, int len) {

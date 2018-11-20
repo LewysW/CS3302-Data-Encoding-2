@@ -8,12 +8,16 @@ public class HammingCode extends ECC {
      * Constructor for HammingCode class
      * @param r - parity bits
      */
-    public HammingCode(int r) {
-        setDistance(3);
-        //Length n is 2^r - 1 (where r is the number of parity bits)
-        setLen((int) Math.pow(2, r) - 1);
-        //Dimension is k, where k is n - r (length of code minus number of parity bits)
-        setDim(getLength() - r);
+    public HammingCode(int r) throws InvalidParameterException {
+        if (r < 2) {
+            throw new InvalidParameterException();
+        } else {
+            setDistance(3);
+            //Length n is 2^r - 1 (where r is the number of parity bits)
+            setLen((int) Math.pow(2, r) - 1);
+            //Dimension is k, where k is n - r (length of code minus number of parity bits)
+            setDim(getLength() - r);
+        }
     }
 
     /**
