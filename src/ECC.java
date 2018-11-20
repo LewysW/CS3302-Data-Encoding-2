@@ -77,6 +77,9 @@ public abstract class ECC implements IECC {
             synTable.put(getSyndrome(error, parityMatrix), error);
         }
 
+
+        System.out.println("Num Correctable Errors: " + maxErrSize);
+
         for (BitSet syndrome: synTable.keySet()) {
             System.out.print("Syndrome: ");
             for (int i = 0; i < (getLength() - getDimension()); i++) {
@@ -100,6 +103,7 @@ public abstract class ECC implements IECC {
             System.out.println();
         }
 
+
         return null;
     }
 
@@ -115,6 +119,7 @@ public abstract class ECC implements IECC {
             result.set(col, total % 2 != 0);
             total = 0;
         }
+
 
         return result;
     }
@@ -133,9 +138,11 @@ public abstract class ECC implements IECC {
                                 int end, int index, int r, ArrayList<BitSet> errorCodes)
     {
         if (index == r) {
-            errorCodes.add(new BitSet(getLength()));
-            for (int j=0; j<r; j++)
-                errorCodes.get(errorCodes.size() - 1).set(data[j]);
+            BitSet error = new BitSet(getLength());
+            for (int j=0; j<r; j++) {
+                error.set(data[j]);
+            }
+            errorCodes.add(error);
             return;
         }
 

@@ -13,12 +13,17 @@ public class ReedMullerCode extends ECC {
         standardise(getGenMatrix());
         setParCheckMatrix(genParityMatrix());
 
+        System.out.println("k: " + k);
+        System.out.println("r: " + r);
+
         System.out.println("Generator Matrix:");
         printMatrix(getGenMatrix(), getLength());
         System.out.println("Parity Check Matrix:");
         printMatrix(getParCheckMatrix(), getLength() - getGenMatrix().size());
         System.out.println("Syndrome Table:");
         genSynTable();
+        System.out.println();
+        System.out.println("------------------------------------");
     }
 
     /**
