@@ -111,6 +111,7 @@ class ECCPublicTests {
             if (rmCodes[i] != null) {
                 for (int j = 0; j < i; j++) {
                     if (rmCodes[i][j] != null) {
+                        System.out.println("k: " + i + " r: " + j);
                         testEncDecClean(rmCodes[i][j]);
                     }
                 }

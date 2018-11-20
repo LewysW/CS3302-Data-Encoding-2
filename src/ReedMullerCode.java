@@ -17,9 +17,6 @@ public class ReedMullerCode extends ECC {
             standardise(getGenMatrix());
             setParCheckMatrix(genParityMatrix());
 
-            System.out.println("k: " + k);
-            System.out.println("r: " + r);
-
             System.out.println("Generator Matrix:");
             printMatrix(getGenMatrix(), getLength());
             System.out.println("Parity Check Matrix:");
@@ -27,6 +24,13 @@ public class ReedMullerCode extends ECC {
             System.out.println("Syndrome Table:");
             setSynTable(genSynTable());
             System.out.println("------------------------------------");
+
+//            BitSet b = new BitSet();
+//            b.set(0);
+//            b.set(2);
+//            b.set(3);
+//            BitSet code = encode(b, 4);
+//            decodeAlways(code, 16);
         }
     }
 
