@@ -317,37 +317,57 @@ public abstract class ECC implements IECC {
 
     @Override
     public BitSet encode(BitSet plaintext, int len) {
-        int maxErrors = (getDistance() - 1) / 2;
-        BitSet encoded = new BitSet(len);
-        BitSet block = new BitSet(getLength());
-        ArrayList<BitSet> blocks = new ArrayList<>();
-
-        if (len <= 0 || maxErrors < 1) return plaintext;
-        for (int i = 0; i < len; i += getLength()) {
-            block = matrixMult(plaintext.get(i, i + getLength() - 1), getGenMatrix());
-
-            blocks.add((BitSet) block.clone());
-        }
-
-        System.out.println("Block: " + block);
-        System.out.println("Blocks: " + blocks);
-
+        int numBlocks = (len - 1) / getDimension() + 1;
+        BitSet codetext = new BitSet();
         int offset = 0;
-        for (BitSet b: blocks) {
-            for (int bit = 0; bit < getLength(); bit++) {
-                encoded.set(offset + bit, b.get(bit));
+
+        //Iterates over number of blocks
+        for (int i = 0; i < numBlocks; i++) {
+            BitSet block = new BitSet();
+
+            //Copies block from plaintext into bitset
+            for (int j = 0; j < getDimension(); j++) {
+                block.set(j, plaintext.get(i + j));
             }
+
+            //Multiplies block by generator matrix
+            block = matrixMult(block, getGenMatrix());
+
+            //Copies multiplied block to codetext
+            for (int j = 0; j < getLength(); j++) {
+                codetext.set(offset + j, block.get(j));
+            }
+
+            //Increases position when block should be copied to
             offset += getLength();
         }
 
-        System.out.println("Encoded: " + encoded);
-
-        return encoded;
+        return codetext;
     }
 
     @Override
     public BitSet decodeAlways(BitSet codetext, int len) {
-        return null;
+        int numBlocks = (len - 1) / getLength() + 1;
+        int offset = 0;
+        BitSet plaintext = new BitSet();
+        System.out.println(codetext);
+
+        for (int i = 0; i < numBlocks; i++) {
+            System.out.println(i);
+            BitSet block = new BitSet();
+
+            for (int j = 0; j < getDimension(); j++) {
+                block.set(j, codetext.get(j + i));
+            }
+
+            for (int j = 0; j < getDimension(); j++) {
+                plaintext.set(j + offset, block.get(j));
+            }
+
+            offset += getLength();
+
+        }
+        return plaintext;
     }
 
     @Override

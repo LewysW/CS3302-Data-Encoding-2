@@ -39,6 +39,13 @@ public class ReedMullerCode extends ECC {
         ArrayList<BitSet> matrix = new ArrayList<>();
         ArrayList<BitSet> newMatrix = new ArrayList<>();
 
+        if (r == 0) {
+            BitSet b = new BitSet(getLength());
+            b.set(0, getLength());
+            matrix.add(b);
+            return  matrix;
+        }
+
         for (int i = 0; i <= k; i++) {
             if (i == 0) {
                 //Set row with all ones
