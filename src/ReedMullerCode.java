@@ -16,21 +16,7 @@ public class ReedMullerCode extends ECC {
             setGenMatrix(generateMatrix(k, r));
             standardise(getGenMatrix());
             setParCheckMatrix(genParityMatrix());
-
-            System.out.println("Generator Matrix:");
-            printMatrix(getGenMatrix(), getLength());
-            System.out.println("Parity Check Matrix:");
-            printMatrix(getParCheckMatrix(), getLength() - getGenMatrix().size());
-            System.out.println("Syndrome Table:");
             setSynTable(genSynTable());
-            System.out.println("------------------------------------");
-
-//            BitSet b = new BitSet();
-//            b.set(0);
-//            b.set(2);
-//            b.set(3);
-//            BitSet code = encode(b, 4);
-//            decodeAlways(code, 16);
         }
     }
 
@@ -233,7 +219,7 @@ public class ReedMullerCode extends ECC {
     }
 
     @Override
-    public BitSet decodeIfUnique(BitSet codetext, int len) {
+    public BitSet decodeIfUnique(BitSet codetext, int len) throws UncorrectableErrorException {
         return super.decodeIfUnique(codetext, len);
     }
 }

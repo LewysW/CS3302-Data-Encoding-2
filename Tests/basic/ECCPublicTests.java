@@ -1,6 +1,10 @@
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Random;
+
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
@@ -111,7 +115,6 @@ class ECCPublicTests {
             if (rmCodes[i] != null) {
                 for (int j = 0; j < i; j++) {
                     if (rmCodes[i][j] != null) {
-                        System.out.println("k: " + i + " r: " + j);
                         testEncDecClean(rmCodes[i][j]);
                     }
                 }
@@ -138,7 +141,6 @@ class ECCPublicTests {
         }
     }
 
-    /*
     @Test
     void testEncDecOneError() {
         for (int r = MIN_HAMMING; r <= MAX_HAMMING; r++) {
@@ -154,7 +156,159 @@ class ECCPublicTests {
             }
         }
     }
-    */
+
+    void testEncDecTwoErrors(IECC c) {
+        Random ran = new Random();
+        for (int i = 1; i < MAX_VEC_LEN; i++) {
+            BitSet p = randomVector(i);
+            int enclen = encodedLength(c, i);
+            BitSet ciph = c.encode(p, i);
+
+            ArrayList<Integer> errpos = new ArrayList<>();
+
+            int errno;
+            while (errpos.size() < 2) {
+                errno = ran.nextInt(enclen);
+
+                if (!errpos.contains(errno)) {
+                    errpos.add(errno);
+                }
+            }
+
+            for (Integer error : errpos) {
+                ciph.set(error, !ciph.get(error));
+            }
+            assertEquals(p, c.decodeAlways(ciph, enclen), c.toString() + " does not decode one error");
+        }
+    }
+
+    @Test
+    void testEncDecTwoErrors() {
+        ECCFactory eccFactory = new ECCFactory();
+
+        for (int k = 0; k <= 4; k++) {
+            for (int r = 0; r < k; r++) {
+                if ((int) Math.pow(2, (k - r)) >= 5) {
+                    ReedMullerCode reedMullerCode = (ReedMullerCode) eccFactory.makeReedMullerCode(k, r);
+                    if (reedMullerCode != null) testEncDecTwoErrors(reedMullerCode);
+                }
+            }
+        }
+    }
+
+
+    void testEncDecThreeErrors(IECC c) {
+        Random ran = new Random();
+        for (int i = 1; i < MAX_VEC_LEN; i++) {
+            BitSet p = randomVector(i);
+            int enclen = encodedLength(c, i);
+            BitSet ciph = c.encode(p, i);
+
+            ArrayList<Integer> errpos = new ArrayList<>();
+
+            int errno;
+            while (errpos.size() < 3) {
+                errno = ran.nextInt(enclen);
+
+                if (!errpos.contains(errno)) {
+                    errpos.add(errno);
+                }
+            }
+
+            for (Integer error : errpos) {
+                ciph.set(error, !ciph.get(error));
+            }
+            assertEquals(p, c.decodeAlways(ciph, enclen), c.toString() + " does not decode one error");
+        }
+    }
+
+    @Test
+    void testEncDecThreeErrors() {
+        ECCFactory eccFactory = new ECCFactory();
+        ReedMullerCode reedMullerCode = (ReedMullerCode) eccFactory.makeReedMullerCode(4, 1);
+        testEncDecThreeErrors(reedMullerCode);
+        reedMullerCode  = (ReedMullerCode) eccFactory.makeReedMullerCode(5, 2);
+        testEncDecThreeErrors(reedMullerCode);
+        reedMullerCode  = (ReedMullerCode) eccFactory.makeReedMullerCode(6, 3);
+        testEncDecThreeErrors(reedMullerCode);
+    }
+
+
+    /**
+     * Tests that decode if unique throws UncorrectableErrorException if
+     * the syndrome is not in the hashmap for 2 errors with a code able
+     * to correct only 1 error
+     */
+    @Test
+    void testDecodeIfUniqueTwoErrorsException() {
+        Random ran = new Random();
+        int exceptionCount = 0;
+        ECCFactory eccFactory = new ECCFactory();
+        ReedMullerCode reedMullerCode = (ReedMullerCode) eccFactory.makeReedMullerCode(3, 1);
+        for (int i = 2; i < MAX_VEC_LEN; i++) {
+            BitSet p = randomVector(i);
+            BitSet ciph = reedMullerCode.encode(p, i);
+            int enclen = encodedLength(reedMullerCode, i);
+            int err;
+            ArrayList<Integer> errors = new ArrayList<>();
+            while (errors.size() < 2) {
+                err = ran.nextInt(enclen);
+
+                if (!errors.contains(err)) {
+                    errors.add(err);
+                    ciph.flip(err);
+                }
+            }
+
+            try {
+                reedMullerCode.decodeIfUnique(ciph, enclen);
+            } catch (UncorrectableErrorException e) {
+                exceptionCount++;
+            }
+
+
+        }
+
+        assertTrue(exceptionCount > 0);
+    }
+
+    /**
+     * Tests that decode if unique throws UncorrectableErrorException if
+     * the syndrome is not in the hashmap for 4 errors with a code able
+     * to correct only 3 error
+     */
+    @Test
+    void testDecodeIfUniqueFourErrorsException() {
+        Random ran = new Random();
+        int exceptionCount = 0;
+        ECCFactory eccFactory = new ECCFactory();
+        ReedMullerCode reedMullerCode = (ReedMullerCode) eccFactory.makeReedMullerCode(4, 1);
+        for (int i = 4; i < MAX_VEC_LEN; i++) {
+            BitSet p = randomVector(i);
+            BitSet ciph = reedMullerCode.encode(p, i);
+            int enclen = encodedLength(reedMullerCode, i);
+            int err;
+            ArrayList<Integer> errors = new ArrayList<>();
+            while (errors.size() < 4) {
+                err = ran.nextInt(enclen);
+
+                if (!errors.contains(err)) {
+                    errors.add(err);
+                    ciph.flip(err);
+                }
+            }
+
+            try {
+                reedMullerCode.decodeIfUnique(ciph, enclen);
+            } catch (UncorrectableErrorException e) {
+                exceptionCount++;
+            }
+
+
+        }
+
+        assertTrue(exceptionCount > 0);
+    }
 
 
 }

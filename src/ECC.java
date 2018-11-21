@@ -80,29 +80,6 @@ public abstract class ECC implements IECC {
             synTable.put(matrixMult(error, parityMatrix), error);
         }
 
-        for (BitSet syndrome: synTable.keySet()) {
-            System.out.print("Syndrome: ");
-            for (int i = 0; i < (getLength() - getDimension()); i++) {
-                if (syndrome.get(i)) {
-                    System.out.print(1);
-                } else {
-                    System.out.print(0);
-                }
-            }
-
-            System.out.print(", Error: ");
-
-            BitSet error = synTable.get(syndrome);
-            for (int i = 0; i < getLength(); i++) {
-                if (error.get(i)) {
-                    System.out.print(1);
-                } else {
-                    System.out.print(0);
-                }
-            }
-            System.out.println();
-        }
-
 
         return synTable;
     }
@@ -321,9 +298,6 @@ public abstract class ECC implements IECC {
         BitSet codetext = new BitSet();
         int index = 0;
 
-        printMatrix(getGenMatrix(), getLength());
-        System.out.println("PLAINTEXT: " + plaintext);
-
         for (int i = 0; i < len; i += getDimension()) {
             BitSet block = new BitSet();
 
@@ -342,10 +316,6 @@ public abstract class ECC implements IECC {
             }
         }
 
-        System.out.println("Codetext: " + codetext);
-
-        System.out.println("getLength(): " + getLength());
-        System.out.println("getDimension(): " + getDimension());
         return codetext;
     }
 
@@ -367,20 +337,51 @@ public abstract class ECC implements IECC {
 
         index = 0;
         for (int i = 0; i < blocks.size(); i++) {
+            BitSet syndrome = matrixMult(blocks.get(i), getParCheckMatrix());
+            blocks.get(i).xor(synTable.get(syndrome));
             for (int j = 0; j < getDimension(); j++) {
                 plaintext.set(index++, blocks.get(i).get(j));
             }
         }
-        System.out.println("Plaintext: " + plaintext);
         return plaintext;
     }
 
     @Override
-    public BitSet decodeIfUnique(BitSet codetext, int len) {
+    public BitSet decodeIfUnique(BitSet codetext, int len) throws UncorrectableErrorException {
         if (this instanceof HammingCode) {
             return this.decodeAlways(codetext, len);
+        } else {
+            ArrayList<BitSet> blocks = new ArrayList<>();
+            BitSet plaintext = new BitSet();
+            int index = 0;
+
+            for (int i = 0; i < len; i += getLength()) {
+                BitSet block = new BitSet();
+
+                for (int j = 0; j < getLength(); j++) {
+                    block.set(j, codetext.get(index++));
+                }
+
+                blocks.add((BitSet) block.clone());
+            }
+
+            index = 0;
+            for (int i = 0; i < blocks.size(); i++) {
+                BitSet syndrome = matrixMult(blocks.get(i), getParCheckMatrix());
+
+                if (synTable.containsKey(syndrome)) {
+                    blocks.get(i).xor(synTable.get(syndrome));
+                } else {
+                    throw new UncorrectableErrorException();
+                }
+
+                for (int j = 0; j < getDimension(); j++) {
+                    plaintext.set(index++, blocks.get(i).get(j));
+                }
+            }
+
+            return plaintext;
         }
-        return null;
     }
 
     @Override
