@@ -180,8 +180,8 @@ public class HammingCode extends ECC {
         sb.append(getLength());
         sb.append(" Dimension: ");
         sb.append(getDimension());
-        sb.append(" Parity Bits: ");
-        sb.append(getLength() - getDimension());
+        sb.append("Distance: ");
+        sb.append(getDistance());
         return sb.toString();
     }
 

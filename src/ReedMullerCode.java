@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -69,7 +68,6 @@ public class ReedMullerCode extends ECC {
         }
         invert(matrix);
         expand(matrix, r);
-        standardise(matrix);
         return matrix;
     }
 
@@ -137,7 +135,6 @@ public class ReedMullerCode extends ECC {
                 }
             }
         }
-        //TODO - possibly remove if it makes no difference to standardisation?
         //Add items in reverse order to matrix
         for (int i = temp.size() - 1; i >= 0; i--) matrix.add(temp.get(i));
         return matrix;
@@ -210,7 +207,31 @@ public class ReedMullerCode extends ECC {
 
     @Override
     public String toString() {
-        return super.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Length: ");
+        sb.append(getLength());
+        sb.append(" Dimension: ");
+        sb.append(getDimension());
+        sb.append(" Distance: ");
+        sb.append(getDistance());
+        sb.append("\n");
+        sb.append(matrixToString(getGenMatrix(), getLength()));
+        sb.append("\n");
+        sb.append(matrixToString(getParCheckMatrix(), getLength() - getDimension()));
+        return sb.toString();
+    }
+
+    private String matrixToString(ArrayList<BitSet> matrix, int len) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int row = 0; row < matrix.size(); row++) {
+            for (int col = 0; col < len; col++) {
+                sb.append(matrix.get(row).get(col) ? "1" : "0");
+                sb.append(" ");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
     @Override

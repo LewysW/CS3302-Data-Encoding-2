@@ -2,8 +2,10 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Random;
 
+import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -240,7 +242,7 @@ class ECCPublicTests {
      * to correct only 1 error
      */
     @Test
-    void testDecodeIfUniqueTwoErrorsException() {
+    void testEncDecIfUniqueTwoErrorsException() {
         Random ran = new Random();
         int exceptionCount = 0;
         ECCFactory eccFactory = new ECCFactory();
@@ -278,7 +280,7 @@ class ECCPublicTests {
      * to correct only 3 error
      */
     @Test
-    void testDecodeIfUniqueFourErrorsException() {
+    void testEncDecIfUniqueFourErrorsException() {
         Random ran = new Random();
         int exceptionCount = 0;
         ECCFactory eccFactory = new ECCFactory();
@@ -308,6 +310,50 @@ class ECCPublicTests {
         }
 
         assertTrue(exceptionCount > 0);
+    }
+
+    /**
+     * Tests that something is returned for decode always even if missing from the syndrome table.
+     */
+    @Test
+    void testDecAlwaysMissingSyndrome() {
+        ECCFactory eccFactory = new ECCFactory();
+        ReedMullerCode reedMullerCode = (ReedMullerCode) eccFactory.makeReedMullerCode(3, 1);
+
+        //Generate an encoding with the first bit set.
+        BitSet encoded = new BitSet(reedMullerCode.getLength());
+        encoded.set(0);
+
+        //Generates syndrome for encoding
+        BitSet syndrome = reedMullerCode.matrixMult(encoded, reedMullerCode.getParCheckMatrix());
+
+        //Gets decoding of code text
+        BitSet originalDecoding = reedMullerCode.decodeAlways(encoded, reedMullerCode.getLength());
+
+        //Removes the syndrome from the syndrome table
+        reedMullerCode.getSynTable().remove(syndrome);
+
+        //Gets the "best guess" using the shortest distance syndrome to generate a second decoding
+        BitSet decoded = reedMullerCode.decodeAlways(encoded, reedMullerCode.getLength());
+
+        //Finds shortest distance syndrome
+        int shortest = 100;
+        int temp;
+        for (BitSet syn : reedMullerCode.getSynTable().keySet()) {
+            if ((temp = reedMullerCode.distance(syn, syndrome, reedMullerCode.getLength())) < shortest) {
+                shortest = temp;
+            }
+        }
+
+        //Tests that both decodings were successful
+        assertNotNull(decoded);
+        assertNotNull(originalDecoding);
+
+        //Tests that the decodings were not the same
+        assertNotEquals(decoded, originalDecoding);
+
+        //Tests that the decoding used corresponds to the closest syndrome
+        assertEquals(shortest, reedMullerCode.distance(syndrome, reedMullerCode.getClosest(syndrome), reedMullerCode.getLength()));
     }
 
 

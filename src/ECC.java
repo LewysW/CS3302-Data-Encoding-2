@@ -319,12 +319,20 @@ public abstract class ECC implements IECC {
         return codetext;
     }
 
+    /**
+     * Decodes an encoded message even if a unique syndrome entry does not exist for it in the table
+     * by returning the value associated with the closest syndrome
+     * @param codetext the binary input
+     * @param len the length of the codetext
+     * @return plaintext
+     */
     @Override
     public BitSet decodeAlways(BitSet codetext, int len) {
         ArrayList<BitSet> blocks = new ArrayList<>();
         BitSet plaintext = new BitSet();
         int index = 0;
 
+        //Chunks up the encoded messages into blocks
         for (int i = 0; i < len; i += getLength()) {
             BitSet block = new BitSet();
 
@@ -336,9 +344,17 @@ public abstract class ECC implements IECC {
         }
 
         index = 0;
+        /*If the syndrome is a key in the syndrome-error map, then an XOR is performed on the block with the corresponding
+        error code - all zeros if correct. Otherwise the closest syndrome is found and that error code is used.*/
         for (int i = 0; i < blocks.size(); i++) {
             BitSet syndrome = matrixMult(blocks.get(i), getParCheckMatrix());
-            blocks.get(i).xor(synTable.get(syndrome));
+
+            if (getSynTable().containsKey(syndrome)) {
+                blocks.get(i).xor(getSynTable().get(syndrome));
+            } else {
+                blocks.get(i).xor(getClosest(syndrome));
+            }
+
             for (int j = 0; j < getDimension(); j++) {
                 plaintext.set(index++, blocks.get(i).get(j));
             }
@@ -346,8 +362,55 @@ public abstract class ECC implements IECC {
         return plaintext;
     }
 
+    /**
+     * Finds the closest syndrome in the table to the new syndrome (if multiple are shortest then takes the first)
+     * @param newSyndrome - syndrome to find closest match
+     * @return
+     */
+    public BitSet getClosest(BitSet newSyndrome) {
+        BitSet shortest = null;
+        int len = getLength() - getDimension();
+
+        for (BitSet syndrome: getSynTable().keySet()) {
+            if (shortest == null) shortest = syndrome;
+
+            if (distance(syndrome, newSyndrome, len) < distance(shortest, newSyndrome, len)) {
+                shortest = syndrome;
+            }
+
+        }
+        return shortest;
+    }
+
+    /**
+     * Calculates the distance between two bitsets
+      * @param b1 - bitset 1
+     * @param b2 - bitset 2
+     * @param len - length of bitsets
+     * @return - distance
+     */
+    public int distance(BitSet b1, BitSet b2, int len) {
+        int dist = 0;
+
+        for (int i = 0; i < len; i++) {
+            if (!(b1.get(i) && b2.get(i))) {
+                dist++;
+            }
+        }
+
+        return dist;
+    }
+
+    /**
+     * Decodes an encoded message if a unique syndrome table entry exists for it
+     * @param codetext the binary input
+     * @param len the length of the codetext
+     * @return plaintext
+     * @throws UncorrectableErrorException - thrown if no unique entry exists
+     */
     @Override
     public BitSet decodeIfUnique(BitSet codetext, int len) throws UncorrectableErrorException {
+        //If the code is a hamming code then decode always is called as hamming is a perfect code
         if (this instanceof HammingCode) {
             return this.decodeAlways(codetext, len);
         } else {
@@ -355,6 +418,7 @@ public abstract class ECC implements IECC {
             BitSet plaintext = new BitSet();
             int index = 0;
 
+            //Chunks up the encoded messages into blocks
             for (int i = 0; i < len; i += getLength()) {
                 BitSet block = new BitSet();
 
@@ -366,15 +430,21 @@ public abstract class ECC implements IECC {
             }
 
             index = 0;
+            //Generates the syndrome for each block by multiplying it by the parity check matrix
             for (int i = 0; i < blocks.size(); i++) {
                 BitSet syndrome = matrixMult(blocks.get(i), getParCheckMatrix());
 
-                if (synTable.containsKey(syndrome)) {
-                    blocks.get(i).xor(synTable.get(syndrome));
+                /*
+                If the syndrome is a key in the syndrome-error map, then an XOR is performed on the block with the corresponding
+                error code - all zeros if correct. Otherwise an UncorrectableErrorException is thrown.
+                 */
+                if (getSynTable().containsKey(syndrome)) {
+                    blocks.get(i).xor(getSynTable().get(syndrome));
                 } else {
                     throw new UncorrectableErrorException();
                 }
 
+                //Assign (corrected) plaintext bits of block to plaintext bitset
                 for (int j = 0; j < getDimension(); j++) {
                     plaintext.set(index++, blocks.get(i).get(j));
                 }
