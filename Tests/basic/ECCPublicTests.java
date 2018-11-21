@@ -2,14 +2,12 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Random;
 
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 class ECCPublicTests {
 
@@ -344,6 +342,7 @@ class ECCPublicTests {
                 shortest = temp;
             }
         }
+
 
         //Tests that both decodings were successful
         assertNotNull(decoded);

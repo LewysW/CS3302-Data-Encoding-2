@@ -62,6 +62,11 @@ public abstract class ECC implements IECC {
         this.synTable = synTable;
     }
 
+    /**
+     * Generates the syndrome table for the encoding using the
+     * parity check matrix and the permuted error codes
+     * @return - syndrome table
+     */
     protected HashMap<BitSet, BitSet> genSynTable() {
         ArrayList<BitSet> parityMatrix = getParCheckMatrix();
         int maxErrSize = (getDistance() - 1) / 2;
@@ -121,21 +126,21 @@ public abstract class ECC implements IECC {
     {
         if (index == r) {
             BitSet error = new BitSet(getLength());
-            for (int j=0; j<r; j++) {
+            for (int j = 0; j < r; j++) {
                 error.set(data[j]);
             }
             errorCodes.add(error);
             return;
         }
 
-        for (int i=start; i<=end && end-i+1 >= r-index; i++) {
+        for (int i = start; i <= end && end - i + 1 >= r - index; i++) {
             data[index] = arr[i];
             combinationUtil(arr, data, i+1, end, index+1, r, errorCodes);
         }
     }
 
     private void getErrorCodes(int arr[], int n, int r, ArrayList<BitSet> errCodes) {
-        int data[]=new int[r];
+        int data[] = new int[r];
 
         combinationUtil(arr, data, 0, n-1, 0, r, errCodes);
     }
@@ -292,12 +297,19 @@ public abstract class ECC implements IECC {
         System.out.println();
     }
 
+    /**
+     * Converts a plaintext message into codetext with parity bits
+     * @param plaintext the binary input
+     * @param len the length of the plaintext
+     * @return codetext
+     */
     @Override
     public BitSet encode(BitSet plaintext, int len) {
         ArrayList<BitSet> blocks = new ArrayList<>();
         BitSet codetext = new BitSet();
         int index = 0;
 
+        //Divides plaintext into blocks
         for (int i = 0; i < len; i += getDimension()) {
             BitSet block = new BitSet();
 
@@ -308,6 +320,7 @@ public abstract class ECC implements IECC {
             blocks.add((BitSet) block.clone());
         }
 
+        //Multiplies each blocks by the generator matrix to get encoded block
         index = 0;
         for (int i = 0; i < blocks.size(); i++) {
             BitSet bs = matrixMult(blocks.get(i), getGenMatrix());
